@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080810">
+<title>Bradley's Debt Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════
+   RESET & TOKENS
+══════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --bg:        #080810;
+  --bg2:       #0D0D18;
+  --surf:      #111120;
+  --surf2:     #181828;
+  --surf3:     #202035;
+  --border:    #1E1E32;
+  --border2:   #2A2A44;
+  --text:      #F0F0E8;
+  --muted:     #8080A0;
+  --dim:       #48485E;
+  --dimmer:    #2C2C42;
+
+  --red:       #FF4040;
+  --red2:      #FF6B6B;
+  --orange:    #FF8C00;
+  --yellow:    #FFD600;
+  --green:     #5EC466;
+  --green2:    #8DD992;
+  --blue:      #4DB8FF;
+  --purple:    #9B6DFF;
+
+  --red-a:     rgba(255,64,64,0.14);
+  --red-b:     rgba(255,64,64,0.28);
+  --orange-a:  rgba(255,140,0,0.14);
+  --orange-b:  rgba(255,140,0,0.30);
+  --green-a:   rgba(94,196,102,0.12);
+  --green-b:   rgba(94,196,102,0.28);
+
+  --sidebar-w: 240px;
+  --nav-h:     66px;
+  --safe-b:    env(safe-area-inset-bottom, 0px);
+  --safe-t:    env(safe-area-inset-top, 0px);
+
+  --radius:    12px;
+  --radius-sm: 8px;
+  --radius-xs: 5px;
+
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body:    'DM Mono', 'Courier New', monospace;
+
+  --shadow-red:   0 0 32px rgba(255,64,64,0.12);
+  --shadow-green: 0 0 28px rgba(94,196,102,0.10);
+}
+
+html { height: 100%; }
+
+body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════════════════════════════════════
+   APP SHELL — DESKTOP SIDEBAR LAYOUT
+══════════════════════════════════════ */
+#shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.sb-brand {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.sb-brand-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--red);
+  line-height: 1;
+}
+.sb-brand-sub {
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* sidebar mini progress */
+.sb-progress {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.sb-prog-label { font-size: 9px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.sb-prog-rem { font-family: var(--font-display); font-size: 28px; letter-spacing: 2px; color: var(--red); line-height: 1; transition: color 0.4s; }
+.sb-prog-rem.done { color: var(--green); }
+.sb-prog-meta { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); margin: 8px 0 4px; }
+.bar { background: var(--surf3); border-radius: 3px; overflow: hidden; }
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--red), var(--orange), var(--yellow));
+  transition: width 0.9s cubic-bezier(.4,0,.2,1);
+}
+.bar.h6 { height: 6px; }
+.bar.h4 { height: 4px; }
+.bar.h3 { height: 3px; }
+
+/* sidebar nav items */
+.sb-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+.sb-nav::-webkit-scrollbar { display: none; }
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--dim);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: all 0.18s;
+  margin-bottom: 2px;
+  font-family: var(--font-body);
+}
+.sb-item svg { width: 18px; height: 18px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.sb-item:hover { color: var(--muted); background: var(--surf2); }
+.sb-item.active { color: var(--red); background: var(--red-a); }
+
+/* sidebar debt mini-list */
+.sb-debts { padding: 12px; border-top: 1px solid var(--border); }
+.sb-debts-label { font-size: 9px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; padding: 0 8px 8px; }
+.sb-debt-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: var(--radius-xs); }
+.sb-debt-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sb-debt-name { font-size: 11px; color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-debt-mini { font-family: var(--font-display); font-size: 13px; color: var(--text); letter-spacing: 0.5px; }
+.sb-debt-row.paid-row .sb-debt-name,
+.sb-debt-row.paid-row .sb-debt-mini { color: var(--dim); text-decoration: line-through; }
+
+/* ── MAIN CONTENT ── */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* top bar (desktop) */
+.topbar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-title { font-family: var(--font-display); font-size: 20px; letter-spacing: 3px; color: var(--text); }
+.topbar-badges { display: flex; gap: 10px; align-items: center; }
+.topbar-badge {
+  font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border2);
+  color: var(--muted); background: var(--surf2);
+}
+.topbar-badge.alert { border-color: var(--red-b); color: var(--red); background: var(--red-a); }
+.topbar-badge.good { border-color: var(--green-b); color: var(--green); background: var(--green-a); }
+
+/* page content */
+.page { flex: 1; padding: 32px; max-width: 1100px; }
+
+/* ── BOTTOM NAV (mobile only) ── */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(8,8,16,0.97);
+  border-top: 1px solid var(--border2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding-bottom: var(--safe-b);
+  z-index: 200;
+}
+.bn-items { display: flex; }
+.bn-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: var(--nav-h);
+  background: none;
+  border: none;
+  color: var(--dim);
+  font-family: var(--font-body);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: color 0.18s;
+}
+.bn-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.bn-btn.active { color: var(--red); }
+
+/* mobile header */
+.mobile-header {
+  display: none;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: calc(14px + var(--safe-t)) 18px 14px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.mh-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.mh-title { font-family: var(--font-display); font-size: 24px; letter-spacing: 3px; color: var(--red); line-height: 1; }
+.mh-sub { font-size: 9px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+.mh-rem { font-family: var(--font-display); font-size: 24px; color: var(--red); text-align: right; line-height: 1; transition: color 0.4s; }
+.mh-rem.done { color: var(--green); }
+.mh-rem-label { font-size: 9px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; text-align: right; }
+.mh-meta { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); margin: 10px 0 4px; }
+
+/* mobile scroll */
+.mobile-scroll {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 16px);
+}
+
+/* ══════════════════════════════════════
+   PANELS
+══════════════════════════════════════ */
+.panel { display: none; }
+.panel.active { display: block; animation: fadeUp 0.2s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* ══════════════════════════════════════
+   DESIGN SYSTEM COMPONENTS
+══════════════════════════════════════ */
+
+/* Section label */
+.slabel {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 14px;
+  margin-top: 32px;
+}
+.slabel:first-child { margin-top: 0; }
+
+/* Cards */
+.card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.card + .card { margin-top: 12px; }
+.card.red-glow { box-shadow: var(--shadow-red); border-color: var(--red-b); }
+.card.green-glow { box-shadow: var(--shadow-green); border-color: var(--green-b); }
+.card.orange-card { background: linear-gradient(135deg,#130A00,#100E00); border-color: var(--orange-b); }
+.card.green-card { background: linear-gradient(135deg,#0A120A,#0D150D); border-color: var(--green-b); }
+
+/* Grid layouts */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.grid-dash { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+
+/* Stat cards */
+.stat-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.stat-label { font-size: 9px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+.stat-value { font-family: var(--font-display); font-size: 36px; letter-spacing: 2px; line-height: 1; }
+.stat-sub { font-size: 10px; color: var(--muted); margin-top: 6px; letter-spacing: 1px; }
+
+/* Dot */
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.dot-sm { display: inline-block; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* Inputs */
+input[type=number], input[type=text] {
+  width: 100%;
+  background: var(--surf2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 12px 14px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+@media (max-width: 768px) {
+  input[type=number], input[type=text] { font-size: 16px; padding: 13px 14px; }
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input:focus { border-color: var(--red); background: #14141F; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--red);
+  color: #000;
+  border: none;
+  padding: 12px 22px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  white-space: nowrap;
+  touch-action: manipulation;
+  min-height: 46px;
+  transition: opacity 0.15s, transform 0.1s, background 0.15s;
+}
+.btn:hover { opacity: 0.88; }
+.btn:active { transform: scale(0.97); }
+.btn.full { width: 100%; }
+.btn.green { background: var(--green); }
+.btn.outline { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
+.btn.outline:hover { border-color: var(--red); color: var(--red); background: var(--red-a); }
+.btn.danger { background: transparent; border: 1px solid var(--dimmer); color: var(--dim); }
+.btn.danger:hover { border-color: var(--red); color: var(--red); }
+.btn.sm { padding: 8px 14px; font-size: 10px; min-height: 36px; letter-spacing: 1.5px; }
+
+/* Tag */
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-radius: 3px;
+}
+.tag.red { background: var(--red-a); color: var(--red); border: 1px solid var(--red-b); }
+.tag.green { background: var(--green-a); color: var(--green); border: 1px solid var(--green-b); }
+.tag.orange { background: var(--orange-a); color: var(--orange); border: 1px solid var(--orange-b); }
+
+/* Divider */
+hr.div { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+/* Empty state */
+.empty { text-align: center; color: var(--dim); font-size: 12px; letter-spacing: 1px; line-height: 2.2; padding: 24px; }
+
+/* ══════════════════════════════════════
+   DASHBOARD PAGE
+══════════════════════════════════════ */
+
+/* Attack card */
+.atk-inner { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.atk-eye { font-size: 9px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
+.atk-name { font-family: var(--font-display); font-size: 42px; letter-spacing: 3px; line-height: 1; }
+.atk-cat { font-size: 12px; color: var(--muted); margin-top: 5px; }
+.atk-right { text-align: right; flex-shrink: 0; }
+.atk-amt { font-family: var(--font-display); font-size: 44px; letter-spacing: 2px; line-height: 1; white-space: nowrap; }
+.atk-lbl { font-size: 9px; color: var(--dim); letter-spacing: 1px; margin-top: 4px; }
+.atk-bar { margin-top: 18px; }
+
+/* Debt row in summary table */
+.dtable { overflow: hidden; }
+.drow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: opacity 0.3s, background 0.15s;
+}
+.drow:last-child { border-bottom: none; }
+.drow:hover { background: var(--surf2); }
+.drow.faded { opacity: 0.35; }
+.drow-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.drow-name { font-size: 14px; letter-spacing: 0.5px; }
+.drow-cat { font-size: 10px; color: var(--dim); margin-top: 2px; }
+.drow-right { text-align: right; flex-shrink: 0; }
+.drow-amt { font-family: var(--font-display); font-size: 22px; letter-spacing: 1px; }
+.drow-pct { font-size: 10px; color: var(--dim); margin-top: 2px; }
+.drow-bar { width: 80px; }
+
+/* Playbook */
+.play { font-size: 12px; color: var(--muted); line-height: 2.1; display: flex; gap: 10px; align-items: flex-start; }
+.play em { color: var(--red); font-style: normal; }
+.play + .play { margin-top: 2px; }
+
+/* ══════════════════════════════════════
+   DEBTS PAGE
+══════════════════════════════════════ */
+.debt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.dcard {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+.dcard.atk { box-shadow: var(--shadow-red); border-color: var(--red-b); }
+.dcard-top { padding: 18px 18px 14px; }
+.dcard-row1 { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
+.dcard-lft { display: flex; gap: 10px; align-items: flex-start; }
+.cbar { width: 4px; border-radius: 2px; min-height: 40px; flex-shrink: 0; }
+.dc-name { font-size: 15px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dc-cat { font-size: 10px; color: var(--dim); margin-top: 3px; }
+.dc-due { font-size: 9px; color: var(--dimmer); margin-top: 2px; }
+.dcard-rgt { text-align: right; }
+.dc-amt { font-family: var(--font-display); font-size: 28px; letter-spacing: 1px; line-height: 1; }
+.dc-pct { font-size: 10px; color: var(--dim); margin-top: 3px; }
+.dcard-bar { height: 4px; background: var(--surf2); }
+.dcard-bar-fill { height: 100%; transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+.dcard-foot { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
+.paid-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px;
+  background: var(--green-a); color: var(--green);
+  border: 1px solid var(--green-b); border-radius: 20px;
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+}
+
+/* ══════════════════════════════════════
+   INCOME PAGE
+══════════════════════════════════════ */
+.income-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.calc-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 13px; }
+.calc-div { border: none; border-top: 1px solid var(--orange-b); margin: 10px 0; }
+.calc-slabel { font-size: 11px; color: var(--orange); letter-spacing: 1px; }
+.calc-sval { font-family: var(--font-display); font-size: 32px; letter-spacing: 1px; }
+.notice { padding: 12px 14px; border-radius: var(--radius-sm); font-size: 12px; line-height: 1.7; margin-top: 14px; }
+.notice.tight { background: var(--red-a); border: 1px solid var(--red-b); color: var(--red2); }
+.notice.surplus { background: var(--orange-a); border: 1px solid var(--orange-b); color: var(--orange); }
+.bill-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.bill-row:last-child { border-bottom: none; }
+.bill-name { display: flex; gap: 10px; align-items: center; }
+.bill-date { color: var(--muted); font-size: 11px; }
+
+/* ══════════════════════════════════════
+   HISTORY PAGE
+══════════════════════════════════════ */
+.hist-table { overflow: hidden; }
+.hist-row { display: flex; justify-content: space-between; align-items: center; padding: 13px 20px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+.hist-row:last-child { border-bottom: none; }
+.hist-row:hover { background: var(--surf2); }
+.hist-name { font-size: 14px; letter-spacing: 0.5px; }
+.hist-date { font-size: 10px; color: var(--dim); margin-top: 3px; }
+.hist-amt { font-family: var(--font-display); font-size: 24px; color: var(--green); letter-spacing: 1px; }
+
+/* ══════════════════════════════════════
+   EARNINGS PAGE
+══════════════════════════════════════ */
+.earn-hero-amt { font-family: var(--font-display); font-size: 72px; color: var(--green); letter-spacing: 3px; line-height: 1; }
+.earn-hero-sub { font-size: 12px; color: var(--dim); margin-top: 8px; }
+.earn-stats { display: flex; gap: 0; margin-top: 20px; border-top: 1px solid var(--green-b); padding-top: 18px; }
+.earn-stat { flex: 1; text-align: center; border-right: 1px solid var(--green-b); padding: 0 12px; }
+.earn-stat:first-child { padding-left: 0; }
+.earn-stat:last-child { border-right: none; padding-right: 0; }
+.es-val { font-family: var(--font-display); font-size: 26px; color: var(--text); letter-spacing: 1px; }
+.es-lbl { font-size: 9px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+.month-row { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.month-row:last-child { border-bottom: none; }
+.mlbl { font-size: 10px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; width: 28px; flex-shrink: 0; }
+.mbar-o { flex: 1; height: 6px; background: var(--surf2); border-radius: 3px; overflow: hidden; }
+.mbar-f { height: 100%; background: linear-gradient(90deg, var(--green), var(--blue)); border-radius: 3px; transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+.mval { font-family: var(--font-display); font-size: 16px; color: var(--green); width: 88px; text-align: right; flex-shrink: 0; letter-spacing: 0.5px; }
+.earn-entry { display: flex; justify-content: space-between; align-items: center; padding: 13px 20px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+.earn-entry:last-child { border-bottom: none; }
+.earn-entry:hover { background: var(--surf2); }
+.en-note { font-size: 14px; letter-spacing: 0.5px; }
+.en-date { font-size: 10px; color: var(--dim); margin-top: 3px; }
+.en-right { display: flex; align-items: center; gap: 10px; }
+.en-amt { font-family: var(--font-display); font-size: 24px; color: var(--green); letter-spacing: 1px; }
+.del-btn { background: none; border: none; color: var(--dimmer); cursor: pointer; font-size: 20px; padding: 6px 8px; line-height: 1; border-radius: 4px; transition: color 0.15s, background 0.15s; }
+.del-btn:hover { color: var(--red); background: var(--red-a); }
+
+/* Earnings input grid */
+.earn-input-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+#toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--green);
+  color: #000;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.22s, transform 0.25s cubic-bezier(.4,0,.2,1);
+  white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════════
+   MOBILE RESPONSIVE
+══════════════════════════════════════ */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; display: none; }
+  .mobile-header { display: block; }
+  .mobile-scroll { display: block; }
+  .bottom-nav { display: block; }
+
+  #shell { flex-direction: column; min-height: 100vh; overflow: hidden; }
+  #shell { height: 100vh; }
+
+  .grid-2, .grid-3, .grid-4, .grid-dash, .debt-grid, .income-grid, .earn-input-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .drow-bar { display: none; }
+
+  .page { display: none !important; }
+
+  .mobile-scroll .slabel { padding: 20px 14px 6px; margin: 0; }
+  .mobile-scroll .card { margin: 0 14px 12px; padding: 16px; }
+  .mobile-scroll .dcard { margin: 0 14px 12px; }
+  .mobile-scroll .stat-card { margin: 0 14px 12px; padding: 16px; }
+  .mobile-scroll hr.div { margin: 0 14px 12px; }
+
+  .mobile-scroll .drow { padding: 12px 16px; }
+  .mobile-scroll .hist-row { padding: 12px 16px; }
+  .mobile-scroll .earn-entry { padding: 12px 16px; }
+  .mobile-scroll .earn-hero-amt { font-size: 52px; }
+  .mobile-scroll .atk-name { font-size: 32px; }
+  .mobile-scroll .atk-amt { font-size: 32px; }
+
+  #toast { bottom: calc(var(--nav-h) + var(--safe-b) + 14px); right: 50%; transform: translateX(50%) translateY(12px); }
+  #toast.show { transform: translateX(50%) translateY(0); }
+}
+
+@media (min-width: 769px) and (max-width: 1100px) {
+  .debt-grid { grid-template-columns: 1fr; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .income-grid { grid-template-columns: 1fr; }
+  .earn-input-grid { grid-template-columns: 1fr 1fr; }
+  .earn-input-grid .btn { grid-column: 1 / -1; }
+  .page { padding: 24px; }
+}
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <!-- ══ SIDEBAR (desktop) ══ -->
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-name">Bradley's</div>
+      <div class="sb-brand-name" style="color:var(--text)">Debt Tracker</div>
+      <div class="sb-brand-sub">Avalanche · Sales Mode</div>
+    </div>
+
+    <div class="sb-progress">
+      <div class="sb-prog-label">Total Remaining</div>
+      <div class="sb-prog-rem" id="sb-rem">$14,149.30</div>
+      <div class="sb-prog-meta">
+        <span id="sb-paid">$0.00 paid</span>
+        <span id="sb-pct">0%</span>
+      </div>
+      <div class="bar h6"><div class="bar-fill" id="sb-bar" style="width:0%"></div></div>
+    </div>
+
+    <nav class="sb-nav">
+      <button class="sb-item active" data-tab="dashboard">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </button>
+      <button class="sb-item" data-tab="debts">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+        Debts
+      </button>
+      <button class="sb-item" data-tab="income">
+        <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Income Calc
+      </button>
+      <button class="sb-item" data-tab="history">
+        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9"/><path d="M3 3v5h5"/><path d="M12 7v5l3.5 2"/></svg>
+        History
+      </button>
+      <button class="sb-item" data-tab="earnings">
+        <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Earnings
+      </button>
+    </nav>
+
+    <div class="sb-debts">
+      <div class="sb-debts-label">Debts</div>
+      <div id="sb-debt-list"></div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN (desktop) ══ -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">DASHBOARD</div>
+      <div class="topbar-badges">
+        <div id="tb-badge-atk" class="topbar-badge alert">Attack: Citi Bank</div>
+        <div id="tb-badge-prog" class="topbar-badge">0.0% paid</div>
+      </div>
+    </div>
+
+    <div class="page">
+      <!-- DASHBOARD -->
+      <div class="panel active" id="tab-dashboard">
+        <div class="grid-dash">
+          <div>
+            <div class="slabel">Attack Target</div>
+            <div class="card red-glow" id="atk-card" style="margin-bottom:16px"></div>
+
+            <div class="slabel">Playbook</div>
+            <div class="card">
+              <div class="play">💀 <span><em>No new Affirm charges</em> — delete it from all saved payment methods</span></div>
+              <div class="play">📈 <span>Good month in sales? Commission hits → send surplus to Citi Bank first</span></div>
+              <div class="play">🔄 <span>Once Citi is cleared, roll that payment into Affirm. Snowball it.</span></div>
+              <div class="play">🎯 <span>Pay minimums on everything else until the current target is cleared</span></div>
+              <div class="play">🚫 <span>Tax refunds, bonuses, unexpected money → all goes to debt first</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="slabel">Debt Breakdown</div>
+            <div class="card dtable" id="sum-list" style="padding:0;overflow:hidden"></div>
+
+            <div class="slabel">Summary</div>
+            <div class="grid-2">
+              <div class="stat-card">
+                <div class="stat-label">Total Debt</div>
+                <div class="stat-value" style="font-size:28px">$14,149.30</div>
+                <div class="stat-sub">5 accounts</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Total Paid</div>
+                <div class="stat-value" id="ds-paid" style="font-size:28px;color:var(--green)">$0.00</div>
+                <div class="stat-sub" id="ds-pct">0.0% cleared</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEBTS -->
+      <div class="panel" id="tab-debts">
+        <div class="slabel">Log Payments</div>
+        <div class="debt-grid" id="debt-cards"></div>
+      </div>
+
+      <!-- INCOME -->
+      <div class="panel" id="tab-income">
+        <div class="income-grid">
+          <div>
+            <div class="slabel">Floor Income</div>
+            <div class="card">
+              <div style="font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:16px">
+                Your floor = the lowest paycheck you've gotten in the last 6 months.<br>
+                Budget every month as if you <em style="color:var(--muted)">only</em> make this amount.
+              </div>
+              <div style="display:flex;gap:10px;margin-bottom:12px">
+                <input type="number" id="floor-input" placeholder="$ monthly floor" value="3000" style="flex:1">
+                <button class="btn" onclick="saveFloor()" style="flex-shrink:0">Save</button>
+              </div>
+              <div style="font-size:12px;color:var(--green)" id="floor-confirm">Floor set: $3,000.00 / month</div>
+            </div>
+
+            <div class="slabel" style="margin-top:24px">Billing Dates</div>
+            <div class="card" style="padding:0 20px" id="bill-list"></div>
+          </div>
+
+          <div>
+            <div class="slabel">This Month's Calculator</div>
+            <div class="card orange-card">
+              <div style="font-size:9px;color:var(--orange);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">Sales Month Calculator</div>
+              <input type="number" id="income-input" placeholder="$ what did you make this month?" oninput="calcSurplus()" style="margin-bottom:0">
+              <div id="calc-res" style="display:none">
+                <div style="height:16px"></div>
+                <div class="calc-row"><span style="color:var(--dim)">Floor income:</span><span id="calc-floor">$3,000.00</span></div>
+                <div class="calc-row"><span style="color:var(--dim)">This month:</span><span id="calc-month">—</span></div>
+                <hr class="calc-div">
+                <div class="calc-row">
+                  <span class="calc-slabel">SURPLUS → Attack:</span>
+                  <span class="calc-sval" id="calc-surp" style="color:var(--orange)">$0</span>
+                </div>
+                <div id="calc-notice"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="panel" id="tab-history">
+        <div class="grid-2" style="align-items:start">
+          <div>
+            <div class="slabel">Payment Log</div>
+            <div class="card hist-table" id="hist-wrap" style="padding:0;overflow:hidden"></div>
+          </div>
+          <div>
+            <div class="slabel">Total Progress</div>
+            <div class="card green-card" id="hist-tot" style="text-align:center;padding:28px 20px"></div>
+            <div style="margin-top:12px;text-align:right">
+              <button class="btn danger sm" onclick="resetAll()">Reset All Debt Data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EARNINGS -->
+      <div class="panel" id="tab-earnings">
+        <div class="slabel">Log a Paycheck</div>
+        <div class="earn-input-grid" style="margin-bottom:24px">
+          <input type="number" id="earn-amt" placeholder="$ paycheck amount">
+          <input type="text" id="earn-note" placeholder="Note — Commission, Bonus, Base…">
+          <button class="btn green" onclick="logEarning()">Log Paycheck</button>
+        </div>
+
+        <div class="slabel">Year at a Glance</div>
+        <div id="earn-year"></div>
+
+        <div class="grid-2" style="margin-top:20px;align-items:start">
+          <div>
+            <div class="slabel">Monthly Breakdown</div>
+            <div class="card" id="earn-monthly" style="padding:8px 20px"></div>
+          </div>
+          <div>
+            <div class="slabel">All Paychecks</div>
+            <div class="card" id="earn-list" style="padding:0;overflow:hidden"></div>
+            <div style="margin-top:12px;text-align:right">
+              <button class="btn danger sm" onclick="resetEarnings()">Reset Earnings</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /page -->
+  </div><!-- /main -->
+
+  <!-- ══ MOBILE HEADER ══ -->
+  <div class="mobile-header" id="mobile-header">
+    <div class="mh-row">
+      <div>
+        <div class="mh-title">Bradley's Debt</div>
+        <div class="mh-sub">Avalanche · Sales Mode</div>
+      </div>
+      <div>
+        <div class="mh-rem-label">Remaining</div>
+        <div class="mh-rem" id="mh-rem">$14,149.30</div>
+      </div>
+    </div>
+    <div class="mh-meta">
+      <span id="mh-paid">PAID $0.00</span>
+      <span id="mh-pct">0.0%</span>
+    </div>
+    <div class="bar h6" style="margin-top:4px"><div class="bar-fill" id="mh-bar" style="width:0%"></div></div>
+  </div>
+
+  <!-- ══ MOBILE SCROLL AREA ══ -->
+  <div class="mobile-scroll" id="mobile-scroll">
+
+    <!-- M-DASHBOARD -->
+    <div class="panel active" id="m-tab-dashboard">
+      <div class="slabel">🎯 Attack Target</div>
+      <div class="card red-glow" id="m-atk-card"></div>
+
+      <div class="slabel">Debt Breakdown</div>
+      <div class="card dtable" id="m-sum-list" style="padding:0;overflow:hidden"></div>
+
+      <div class="slabel">Playbook</div>
+      <div class="card">
+        <div class="play" style="font-size:12px">💀 <span><em>No new Affirm charges</em></span></div>
+        <div class="play" style="font-size:12px;margin-top:6px">📈 <span>Good month? Commission → Citi Bank first</span></div>
+        <div class="play" style="font-size:12px;margin-top:6px">🔄 <span>Citi done? Roll payment into Affirm</span></div>
+        <div class="play" style="font-size:12px;margin-top:6px">🎯 <span>Pay minimums on all others until target clears</span></div>
+      </div>
+    </div>
+
+    <!-- M-DEBTS -->
+    <div class="panel" id="m-tab-debts">
+      <div class="slabel">Log a Payment</div>
+      <div id="m-debt-cards"></div>
+    </div>
+
+    <!-- M-INCOME -->
+    <div class="panel" id="m-tab-income">
+      <div class="slabel">Floor Income</div>
+      <div class="card">
+        <div style="font-size:11px;color:var(--dim);line-height:1.7;margin-bottom:14px">Floor = worst paycheck in last 6 months. Budget only from this.</div>
+        <div style="display:flex;gap:10px;margin-bottom:10px">
+          <input type="number" id="m-floor-input" placeholder="$ monthly floor" value="3000" style="flex:1">
+          <button class="btn" onclick="mSaveFloor()" style="flex-shrink:0">Save</button>
+        </div>
+        <div style="font-size:12px;color:var(--green)" id="m-floor-confirm">Floor set: $3,000.00 / month</div>
+      </div>
+
+      <div class="slabel">This Month</div>
+      <div class="card orange-card">
+        <div style="font-size:9px;color:var(--orange);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">Sales Month Calculator</div>
+        <input type="number" id="m-income-input" placeholder="$ what did you make?" oninput="mCalcSurplus()">
+        <div id="m-calc-res" style="display:none">
+          <div style="height:14px"></div>
+          <div class="calc-row"><span style="color:var(--dim)">Floor:</span><span id="m-calc-floor">$3,000.00</span></div>
+          <div class="calc-row"><span style="color:var(--dim)">This month:</span><span id="m-calc-month">—</span></div>
+          <hr class="calc-div">
+          <div class="calc-row">
+            <span class="calc-slabel">SURPLUS:</span>
+            <span class="calc-sval" id="m-calc-surp" style="color:var(--orange)">$0</span>
+          </div>
+          <div id="m-calc-notice"></div>
+        </div>
+      </div>
+
+      <div class="slabel">Billing Dates</div>
+      <div class="card" style="padding:0 16px" id="m-bill-list"></div>
+    </div>
+
+    <!-- M-HISTORY -->
+    <div class="panel" id="m-tab-history">
+      <div class="slabel">Payment History</div>
+      <div id="m-hist-wrap"></div>
+      <div id="m-hist-tot"></div>
+      <div style="padding:16px 14px 0;text-align:center">
+        <button class="btn danger sm" onclick="resetAll()">Reset All Debt Data</button>
+      </div>
+    </div>
+
+    <!-- M-EARNINGS -->
+    <div class="panel" id="m-tab-earnings">
+      <div class="slabel">Log a Paycheck</div>
+      <div class="card green-card">
+        <div style="font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">Income Tracker</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <input type="number" id="m-earn-amt" placeholder="$ paycheck amount">
+          <input type="text" id="m-earn-note" placeholder="Note — Commission, Bonus…">
+          <button class="btn green full" onclick="mLogEarning()">Log Paycheck</button>
+        </div>
+      </div>
+
+      <div class="slabel">Year at a Glance</div>
+      <div id="m-earn-year"></div>
+
+      <div class="slabel">Monthly Breakdown</div>
+      <div class="card" id="m-earn-monthly" style="padding:8px 16px"></div>
+
+      <div class="slabel">All Paychecks</div>
+      <div id="m-earn-list"></div>
+      <div style="padding:16px 14px 0;text-align:center">
+        <button class="btn danger sm" onclick="resetEarnings()">Reset Earnings</button>
+      </div>
+    </div>
+
+  </div><!-- /mobile-scroll -->
+
+  <!-- ══ BOTTOM NAV ══ -->
+  <nav class="bottom-nav">
+    <div class="bn-items">
+      <button class="bn-btn active" data-tab="dashboard">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Home
+      </button>
+      <button class="bn-btn" data-tab="debts">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+        Debts
+      </button>
+      <button class="bn-btn" data-tab="income">
+        <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Income
+      </button>
+      <button class="bn-btn" data-tab="history">
+        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9"/><path d="M3 3v5h5"/><path d="M12 7v5l3.5 2"/></svg>
+        History
+      </button>
+      <button class="bn-btn" data-tab="earnings">
+        <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Earnings
+      </button>
+    </div>
+  </nav>
+
+</div><!-- /shell -->
+<div id="toast">Saved!</div>
+
+<script>
+/* ════════════════════════════════
+   DATA
+════════════════════════════════ */
+const DEBTS = [
+  { id:1, name:'Citi Bank',     cat:'Credit Card',      orig:4166.72, due:'16th', color:'#FF4040' },
+  { id:2, name:'Affirm',        cat:'Credit Card',       orig:1696.92, due:'N/A',  color:'#FF8C00' },
+  { id:3, name:'Tropical Bank', cat:'Credit Card',       orig:998.00,  due:'30th', color:'#FFD600' },
+  { id:4, name:'Car Note',      cat:'2021 Chevy Camaro', orig:5677.98, due:'28th', color:'#4DB8FF' },
+  { id:5, name:'Student Loans', cat:'School Loan',       orig:1609.68, due:'13th', color:'#5EC466' },
+];
+const TOTAL = 14149.30;
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ════════════════════════════════
+   STATE
+════════════════════════════════ */
+function load() { try { return JSON.parse(localStorage.getItem('bdt4')||'{}'); } catch { return {}; } }
+function save() { localStorage.setItem('bdt4', JSON.stringify(st)); }
+
+let st = { paid:{1:0,2:0,3:0,4:0,5:0}, history:[], earnings:[], floor:3000, ...load() };
+DEBTS.forEach(d => { if (st.paid[d.id]==null) st.paid[d.id]=0; });
+
+/* ════════════════════════════════
+   UTILS
+════════════════════════════════ */
+const fmt  = n => '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const rem  = id => Math.max(0, DEBTS.find(d=>d.id===id).orig - (st.paid[id]||0));
+const pct  = id => { const d=DEBTS.find(d=>d.id===id); return Math.min(100,(st.paid[id]||0)/d.orig*100); };
+const totPaid = () => Object.values(st.paid).reduce((a,b)=>a+(b||0),0);
+const totRem  = () => Math.max(0, TOTAL - totPaid());
+const target  = () => DEBTS.find(d => rem(d.id)>0);
+const isMobile = () => window.innerWidth <= 768;
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+/* ════════════════════════════════
+   HEADER / SIDEBAR RENDER
+════════════════════════════════ */
+function rHeader() {
+  const p=totPaid(), l=totRem(), pp=p/TOTAL*100;
+
+  // desktop sidebar
+  const sbRem = document.getElementById('sb-rem');
+  if (sbRem) {
+    sbRem.textContent = fmt(l);
+    sbRem.className = 'sb-prog-rem'+(l===0?' done':'');
+    document.getElementById('sb-paid').textContent = fmt(p)+' paid';
+    document.getElementById('sb-pct').textContent = pp.toFixed(1)+'%';
+    document.getElementById('sb-bar').style.width = pp+'%';
+  }
+
+  // desktop topbar
+  const tgt = target();
+  const tbAtk = document.getElementById('tb-badge-atk');
+  const tbProg = document.getElementById('tb-badge-prog');
+  if (tbAtk) tbAtk.textContent = tgt ? 'Attack: '+tgt.name : '✓ All Clear';
+  if (tbProg) tbProg.textContent = pp.toFixed(1)+'% paid';
+
+  // desktop dashboard stats
+  const dsp = document.getElementById('ds-paid');
+  const dspc = document.getElementById('ds-pct');
+  if (dsp) { dsp.textContent = fmt(p); dspc.textContent = pp.toFixed(1)+'% cleared'; }
+
+  // mobile header
+  const mhRem = document.getElementById('mh-rem');
+  if (mhRem) {
+    mhRem.textContent = fmt(l);
+    mhRem.className = 'mh-rem'+(l===0?' done':'');
+    document.getElementById('mh-paid').textContent = 'PAID '+fmt(p);
+    document.getElementById('mh-pct').textContent = pp.toFixed(1)+'%';
+    document.getElementById('mh-bar').style.width = pp+'%';
+  }
+
+  // sidebar mini debt list
+  rSidebarDebts();
+}
+
+function rSidebarDebts() {
+  const c = document.getElementById('sb-debt-list');
+  if (!c) return;
+  c.innerHTML = '';
+  DEBTS.forEach(d => {
+    const r = rem(d.id), done = r===0;
+    const row = document.createElement('div');
+    row.className = 'sb-debt-row'+(done?' paid-row':'');
+    row.innerHTML = `<div class="sb-debt-dot" style="background:${d.color}"></div><div class="sb-debt-name">${d.name}</div><div class="sb-debt-mini">${done?'PAID':fmt(r)}</div>`;
+    c.appendChild(row);
+  });
+}
+
+/* ════════════════════════════════
+   ATTACK CARD
+════════════════════════════════ */
+function atkCardHTML() {
+  const t = target();
+  if (!t) return `<div style="text-align:center;padding:12px"><div style="font-family:var(--font-display);font-size:48px;color:var(--green);letter-spacing:4px">ALL CLEAR!</div><div style="font-size:13px;color:var(--dim);margin-top:8px">Every debt is paid. You did it. 🎉</div></div>`;
+  return `
+    <div class="atk-inner">
+      <div>
+        <div class="atk-eye">Focus All Surplus On</div>
+        <div class="atk-name" style="color:${t.color}">${t.name}</div>
+        <div class="atk-cat">${t.cat} · Due ${t.due}</div>
+      </div>
+      <div class="atk-right">
+        <div class="atk-amt">${fmt(rem(t.id))}</div>
+        <div class="atk-lbl">remaining</div>
+      </div>
+    </div>
+    <div class="atk-bar"><div class="bar h4"><div class="bar-fill" style="width:${pct(t.id)}%;background:${t.color}"></div></div></div>`;
+}
+
+/* ════════════════════════════════
+   DASHBOARD
+════════════════════════════════ */
+function rDashboard() {
+  ['atk-card','m-atk-card'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = atkCardHTML();
+  });
+
+  ['sum-list','m-sum-list'].forEach(id => {
+    const list = document.getElementById(id);
+    if (!list) return;
+    list.innerHTML = '';
+    DEBTS.forEach(d => {
+      const r=rem(d.id), done=r===0;
+      const row = document.createElement('div');
+      row.className = 'drow'+(done?' faded':'');
+      row.innerHTML = `
+        <div class="drow-left">
+          <div class="dot" style="background:${d.color}"></div>
+          <div><div class="drow-name">${done?'✓ ':''}${d.name}</div><div class="drow-cat">${d.cat}</div></div>
+        </div>
+        <div class="drow-bar"><div class="bar h3"><div class="bar-fill" style="width:${pct(d.id)}%;background:${d.color}"></div></div></div>
+        <div class="drow-right">
+          <div class="drow-amt" style="color:${done?'var(--green)':'var(--text)'}">${done?'PAID':fmt(r)}</div>
+          <div class="drow-pct">${pct(d.id).toFixed(0)}%</div>
+        </div>`;
+      list.appendChild(row);
+    });
+  });
+}
+
+/* ════════════════════════════════
+   DEBTS
+════════════════════════════════ */
+function debtCardHTML(d, prefix='') {
+  const r=rem(d.id), done=r===0, p=pct(d.id), tgt=target(), isAtk=tgt?.id===d.id;
+  return `
+    <div class="dcard${isAtk&&!done?' atk':''}">
+      <div class="dcard-top">
+        <div class="dcard-row1">
+          <div class="dcard-lft">
+            <div class="cbar" style="background:${d.color};height:${done?'24px':'48px'}"></div>
+            <div>
+              <div class="dc-name">${d.name}${isAtk&&!done?'<span class="tag red">ATTACK</span>':done?'<span class="tag green">PAID</span>':''}</div>
+              <div class="dc-cat">${d.cat}</div>
+              <div class="dc-due">Billing: ${d.due}</div>
+            </div>
+          </div>
+          <div class="dcard-rgt">
+            <div class="dc-amt" style="color:${done?'var(--green)':'var(--text)'}">${done?'$0.00':fmt(r)}</div>
+            <div class="dc-pct">${p.toFixed(1)}% paid</div>
+          </div>
+        </div>
+        <div style="margin-bottom:4px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-bottom:4px">
+            <span>Paid: ${fmt(st.paid[d.id]||0)}</span>
+            <span>Original: ${fmt(d.orig)}</span>
+          </div>
+          <div class="dcard-bar"><div class="dcard-bar-fill" style="width:${p}%;background:${d.color}"></div></div>
+        </div>
+      </div>
+      ${!done
+        ?`<div class="dcard-foot"><input type="number" id="${prefix}pay-${d.id}" placeholder="$ amount paid" style="flex:1"><button class="btn" onclick="logPayment(${d.id},'${prefix}')">Log</button></div>`
+        :`<div class="dcard-foot"><span class="paid-badge">✓ Cleared</span></div>`}
+    </div>`;
+}
+
+function rDebts() {
+  const dc = document.getElementById('debt-cards');
+  const mdc = document.getElementById('m-debt-cards');
+  if (dc) dc.innerHTML = DEBTS.map(d=>debtCardHTML(d,'')).join('');
+  if (mdc) mdc.innerHTML = DEBTS.map(d=>debtCardHTML(d,'m-')).join('');
+}
+
+function logPayment(id, prefix='') {
+  const inp = document.getElementById(prefix+'pay-'+id);
+  const amt = parseFloat(inp?.value||0);
+  if (!amt||amt<=0) { inp?.focus(); return; }
+  const actual = Math.min(amt, rem(id));
+  st.paid[id] = (st.paid[id]||0)+actual;
+  st.history.unshift({ date:new Date().toLocaleDateString('en-US'), name:DEBTS.find(d=>d.id===id).name, amount:actual, ts:Date.now() });
+  if (st.history.length>80) st.history=st.history.slice(0,80);
+  save(); rAll(); toast('+'+fmt(actual)+' logged!');
+}
+
+/* ════════════════════════════════
+   INCOME
+════════════════════════════════ */
+function saveFloor() {
+  const v = parseFloat(document.getElementById('floor-input').value||0);
+  if (v>0) { st.floor=v; save(); document.getElementById('floor-confirm').textContent='Floor set: '+fmt(v)+' / month'; calcSurplus(); toast('Floor saved!'); }
+}
+function mSaveFloor() {
+  const v = parseFloat(document.getElementById('m-floor-input').value||0);
+  if (v>0) { st.floor=v; save(); document.getElementById('m-floor-confirm').textContent='Floor set: '+fmt(v)+' / month'; mCalcSurplus(); toast('Floor saved!'); }
+}
+
+function _calcSurplus(incId, resId, floorId, monthId, surpId, noticeId) {
+  const inc = parseFloat(document.getElementById(incId).value||0);
+  const res = document.getElementById(resId);
+  if (!inc) { res.style.display='none'; return; }
+  res.style.display='';
+  const surp = Math.max(0,inc-st.floor);
+  document.getElementById(floorId).textContent = fmt(st.floor);
+  document.getElementById(monthId).textContent = fmt(inc);
+  const sa = document.getElementById(surpId);
+  sa.textContent = surp>0?fmt(surp):'$0.00';
+  sa.style.color = surp>0?'var(--orange)':'var(--dim)';
+  const tgt = target();
+  const n = document.getElementById(noticeId);
+  if (surp>0) n.innerHTML=`<div class="notice surplus">🔥 Great month! Send <strong>${fmt(surp)}</strong> straight to <strong>${tgt?.name||'Citi Bank'}</strong> before spending anything extra.</div>`;
+  else if (inc>0) n.innerHTML=`<div class="notice tight">Tight month. Cover minimums only. Do NOT use Affirm.</div>`;
+  else n.innerHTML='';
+}
+function calcSurplus() { _calcSurplus('income-input','calc-res','calc-floor','calc-month','calc-surp','calc-notice'); }
+function mCalcSurplus() { _calcSurplus('m-income-input','m-calc-res','m-calc-floor','m-calc-month','m-calc-surp','m-calc-notice'); }
+
+function rBilling() {
+  ['bill-list','m-bill-list'].forEach(id => {
+    const c = document.getElementById(id);
+    if (!c) return;
+    c.innerHTML = '';
+    DEBTS.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'bill-row';
+      row.innerHTML = `<div class="bill-name"><div class="dot-sm" style="background:${d.color}"></div><span>${d.name}</span></div><span class="bill-date">Due ${d.due}</span>`;
+      c.appendChild(row);
+    });
+  });
+}
+
+/* ════════════════════════════════
+   HISTORY
+════════════════════════════════ */
+function rHistory() {
+  ['hist-wrap','m-hist-wrap'].forEach(id => {
+    const wrap = document.getElementById(id);
+    if (!wrap) return;
+    if (!st.history.length) { wrap.innerHTML='<div class="empty">No payments logged yet.<br>Go to Debts to log your first payment.</div>'; return; }
+    const bg = document.createElement('div');
+    bg.className = 'hist-table';
+    st.history.forEach(h => {
+      const row = document.createElement('div');
+      row.className = 'hist-row';
+      row.innerHTML = `<div><div class="hist-name">${h.name}</div><div class="hist-date">${h.date}</div></div><div class="hist-amt">+${fmt(h.amount)}</div>`;
+      bg.appendChild(row);
+    });
+    wrap.innerHTML = '';
+    wrap.appendChild(bg);
+  });
+
+  ['hist-tot','m-hist-tot'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const p=totPaid(), l=totRem();
+    el.innerHTML = `
+      <div style="font-size:10px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px">Total Paid Off</div>
+      <div style="font-family:var(--font-display);font-size:52px;color:var(--green);letter-spacing:3px;line-height:1">${fmt(p)}</div>
+      <div style="font-size:12px;color:var(--dim);margin-top:12px;line-height:1.8">${l>0?fmt(l)+' left to freedom.<br>Keep going.':'🎉 Every single debt is cleared!'}</div>`;
+  });
+}
+
+/* ════════════════════════════════
+   EARNINGS
+════════════════════════════════ */
+function _logEarning(amtId, noteId, cb) {
+  const amt = parseFloat(document.getElementById(amtId).value||0);
+  const note = document.getElementById(noteId).value.trim()||'Paycheck';
+  if (!amt||amt<=0) { document.getElementById(amtId).focus(); return; }
+  const now = new Date();
+  st.earnings = st.earnings||[];
+  st.earnings.unshift({ amount:amt, note, date:now.toLocaleDateString('en-US'), month:now.getMonth(), year:now.getFullYear(), ts:Date.now() });
+  save();
+  document.getElementById(amtId).value='';
+  document.getElementById(noteId).value='';
+  rEarnings(); toast('Paycheck logged!');
+}
+function logEarning() { _logEarning('earn-amt','earn-note'); }
+function mLogEarning() { _logEarning('m-earn-amt','m-earn-note'); }
+
+function rEarnings() {
+  const earnings = st.earnings||[];
+  const now = new Date(), yr = now.getFullYear();
+  const yrE = earnings.filter(e=>e.year===yr);
+  const yrTot = yrE.reduce((s,e)=>s+e.amount,0);
+  const cnt = yrE.length, avg=cnt>0?yrTot/cnt:0, best=cnt>0?Math.max(...yrE.map(e=>e.amount)):0;
+
+  const heroHTML = `
+    <div class="card green-card" style="margin-bottom:0">
+      <div style="font-size:9px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px">${yr} Total Earned</div>
+      <div class="earn-hero-amt">${fmt(yrTot)}</div>
+      <div class="earn-hero-sub">${cnt} paycheck${cnt!==1?'s':''} logged this year</div>
+      <div class="earn-stats">
+        <div class="earn-stat"><div class="es-val">${fmt(avg)}</div><div class="es-lbl">Avg Check</div></div>
+        <div class="earn-stat"><div class="es-val">${fmt(best)}</div><div class="es-lbl">Best Check</div></div>
+        <div class="earn-stat"><div class="es-val">${fmt(yrTot/12)}</div><div class="es-lbl">Mo. Avg</div></div>
+        <div class="earn-stat"><div class="es-val">${cnt}</div><div class="es-lbl">Checks</div></div>
+      </div>
+    </div>`;
+
+  ['earn-year','m-earn-year'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = heroHTML;
+  });
+
+  // monthly bars
+  const mT = Array(12).fill(0);
+  yrE.forEach(e=>{mT[e.month]+=e.amount;});
+  const maxM = Math.max(...mT,1);
+
+  ['earn-monthly','m-earn-monthly'].forEach(id => {
+    const em = document.getElementById(id);
+    if (!em) return;
+    em.innerHTML = '';
+    if (yrTot===0) { em.innerHTML='<div class="empty" style="padding:12px 0">No paychecks for '+yr+' yet.</div>'; return; }
+    MONTHS.forEach((m,i) => {
+      if (mT[i]===0&&i>now.getMonth()) return;
+      const row = document.createElement('div');
+      row.className = 'month-row';
+      const w = mT[i]>0?(mT[i]/maxM*100).toFixed(1):0;
+      row.innerHTML = `<div class="mlbl">${m}</div><div class="mbar-o"><div class="mbar-f" style="width:${w}%"></div></div><div class="mval">${mT[i]>0?fmt(mT[i]):'—'}</div>`;
+      em.appendChild(row);
+    });
+  });
+
+  // all entries
+  ['earn-list','m-earn-list'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!earnings.length) { el.innerHTML='<div class="empty">No paychecks yet.<br>Log your first one above.</div>'; return; }
+    const bg = document.createElement('div');
+    earnings.forEach((e,idx) => {
+      const row = document.createElement('div');
+      row.className = 'earn-entry';
+      row.innerHTML = `
+        <div><div class="en-note">${e.note}</div><div class="en-date">${e.date}${e.year!==yr?' · '+e.year:''}</div></div>
+        <div class="en-right"><div class="en-amt">+${fmt(e.amount)}</div><button class="del-btn" onclick="delEarning(${idx})" title="Remove">×</button></div>`;
+      bg.appendChild(row);
+    });
+    el.innerHTML=''; el.appendChild(bg);
+  });
+}
+
+function delEarning(idx) { if(!confirm('Remove this entry?'))return; st.earnings.splice(idx,1); save(); rEarnings(); toast('Entry removed.'); }
+function resetEarnings() { if(!confirm('Reset all earnings? Cannot be undone.'))return; st.earnings=[]; save(); rEarnings(); toast('Earnings reset.'); }
+function resetAll() { if(!confirm('Reset all debt data? Cannot be undone.'))return; st={paid:{1:0,2:0,3:0,4:0,5:0},history:[],earnings:st.earnings,floor:st.floor}; save(); rAll(); toast('Data reset.'); }
+
+/* ════════════════════════════════
+   TABS — DESKTOP + MOBILE
+════════════════════════════════ */
+function switchTab(tab) {
+  // desktop
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.querySelectorAll('.main .panel').forEach(p=>p.classList.remove('active'));
+  const dp = document.getElementById('tab-'+tab);
+  if (dp) dp.classList.add('active');
+  const titleMap = {dashboard:'Dashboard',debts:'Debts',income:'Income Calculator',history:'Payment History',earnings:'Earnings Tracker'};
+  const tt = document.getElementById('topbar-title');
+  if (tt) tt.textContent = titleMap[tab]||tab.toUpperCase();
+
+  // mobile
+  document.querySelectorAll('.bn-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.querySelectorAll('.mobile-scroll .panel').forEach(p=>p.classList.remove('active'));
+  const mp = document.getElementById('m-tab-'+tab);
+  if (mp) mp.classList.add('active');
+
+  // scroll top
+  const ms = document.getElementById('mobile-scroll');
+  if (ms) ms.scrollTop=0;
+  window.scrollTo(0,0);
+
+  // lazy renders
+  if (tab==='history') rHistory();
+  if (tab==='earnings') rEarnings();
+}
+
+// Desktop sidebar
+document.querySelectorAll('.sb-item').forEach(btn => {
+  btn.addEventListener('click', ()=>switchTab(btn.dataset.tab));
+});
+// Mobile bottom nav
+document.querySelectorAll('.bn-btn').forEach(btn => {
+  btn.addEventListener('click', ()=>switchTab(btn.dataset.tab));
+});
+
+/* ════════════════════════════════
+   SYNC FLOOR INPUTS
+════════════════════════════════ */
+document.getElementById('floor-input').addEventListener('input', function() {
+  const mi = document.getElementById('m-floor-input');
+  if (mi) mi.value = this.value;
+});
+document.getElementById('m-floor-input').addEventListener('input', function() {
+  const di = document.getElementById('floor-input');
+  if (di) di.value = this.value;
+});
+
+/* ════════════════════════════════
+   INIT
+════════════════════════════════ */
+function rAll() {
+  rHeader();
+  rDashboard();
+  rDebts();
+  rBilling();
+  // sync floor
+  const fv = fmt(st.floor)+' / month';
+  const fi = document.getElementById('floor-input');
+  const mfi = document.getElementById('m-floor-input');
+  const fc = document.getElementById('floor-confirm');
+  const mfc = document.getElementById('m-floor-confirm');
+  if (fi) fi.value = st.floor;
+  if (mfi) mfi.value = st.floor;
+  if (fc) fc.textContent = 'Floor set: '+fv;
+  if (mfc) mfc.textContent = 'Floor set: '+fv;
+}
+
+rAll();
+</script>
+</body>
+</html>
