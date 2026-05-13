@@ -30,10 +30,25 @@
 html { height:100%; }
 body { min-height:100%; background:var(--bg); color:var(--text); font-family:var(--font-body); font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased; }
 
+/* SYNC STATUS */
+#sync-status { position:fixed; top:12px; right:16px; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:4px 10px; border-radius:20px; z-index:9999; transition:all 0.3s; pointer-events:none; }
+#sync-status.syncing { background:var(--blue-a); border:1px solid var(--blue-b); color:var(--blue); }
+#sync-status.saved { background:var(--green-a); border:1px solid var(--green-b); color:var(--green); }
+#sync-status.error { background:var(--red-a); border:1px solid var(--red-b); color:var(--red); }
+#sync-status.hidden { opacity:0; }
+
+/* LOADING */
+#loading-screen { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:99999; transition:opacity 0.4s; }
+#loading-screen.fade { opacity:0; pointer-events:none; }
+.load-title { font-family:var(--font-display); font-size:36px; letter-spacing:6px; color:var(--red); margin-bottom:8px; }
+.load-sub { font-size:9px; color:var(--dim); letter-spacing:3px; text-transform:uppercase; margin-bottom:32px; }
+.load-bar { width:200px; height:3px; background:var(--surf3); border-radius:2px; overflow:hidden; }
+.load-bar-fill { height:100%; background:linear-gradient(90deg,var(--red),var(--orange)); border-radius:2px; animation:loadpulse 1.2s ease-in-out infinite; }
+@keyframes loadpulse { 0%{width:0%} 50%{width:80%} 100%{width:100%} }
+.load-msg { font-size:10px; color:var(--dim); letter-spacing:2px; margin-top:14px; }
+
 /* SHELL */
 #shell { display:flex; min-height:100vh; }
-
-/* SIDEBAR */
 .sidebar { width:var(--sidebar-w); background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:100; overflow:hidden; }
 .sb-brand { padding:28px 24px 20px; border-bottom:1px solid var(--border); }
 .sb-brand-name { font-family:var(--font-display); font-size:22px; letter-spacing:3px; color:var(--red); line-height:1; }
@@ -157,7 +172,6 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
 .atk-amt { font-family:var(--font-display); font-size:44px; letter-spacing:2px; line-height:1; white-space:nowrap; }
 .atk-lbl { font-size:9px; color:var(--dim); letter-spacing:1px; margin-top:4px; }
 .atk-bar { margin-top:18px; }
-
 .dtable { overflow:hidden; }
 .drow { display:flex; align-items:center; gap:12px; padding:13px 20px; border-bottom:1px solid var(--border); transition:opacity 0.3s,background 0.15s; }
 .drow:last-child { border-bottom:none; }
@@ -170,7 +184,6 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
 .drow-amt { font-family:var(--font-display); font-size:22px; letter-spacing:1px; }
 .drow-pct { font-size:10px; color:var(--dim); margin-top:2px; }
 .drow-bar { width:80px; }
-
 .play { font-size:12px; color:var(--muted); line-height:2.1; display:flex; gap:10px; align-items:flex-start; }
 .play em { color:var(--red); font-style:normal; }
 .play+.play { margin-top:2px; }
@@ -252,7 +265,7 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
 .del-btn:hover { color:var(--red); background:var(--red-a); }
 .earn-input-grid { display:grid; grid-template-columns:1fr 1fr auto; gap:12px; align-items:end; }
 
-/* ====== TAXES TAB ====== */
+/* TAXES */
 .tax-grid { display:grid; grid-template-columns:1fr 340px; gap:20px; align-items:start; }
 .expense-row { display:flex; align-items:center; gap:12px; padding:12px 20px; border-bottom:1px solid var(--border); transition:background 0.15s; }
 .expense-row:last-child { border-bottom:none; }
@@ -261,7 +274,6 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
 .exp-name { flex:1; min-width:0; }
 .exp-title { font-size:14px; letter-spacing:.3px; }
 .exp-cat { font-size:10px; color:var(--dim); margin-top:2px; }
-.exp-date { font-size:10px; color:var(--dimmer); }
 .exp-amt { font-family:var(--font-display); font-size:22px; letter-spacing:1px; color:var(--text); white-space:nowrap; }
 .exp-deductible { font-size:9px; margin-top:3px; text-align:right; }
 .exp-deductible.yes { color:var(--teal); }
@@ -285,8 +297,6 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
 .filter-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
 .filter-btn { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:5px 12px; border-radius:20px; border:1px solid var(--border2); color:var(--dim); background:var(--surf2); cursor:pointer; font-family:var(--font-body); transition:all 0.15s; }
 .filter-btn.active { border-color:var(--teal-b); color:var(--teal); background:var(--teal-a); }
-.income-yr-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px; }
-.income-yr-row:last-child { border-bottom:none; }
 
 /* MONTHLY INCOME BANNER */
 .monthly-banner { background:linear-gradient(135deg,#0A1200,#0D1400); border:1px solid rgba(255,214,0,0.25); border-radius:var(--radius); padding:16px 20px; margin-bottom:16px; }
@@ -294,7 +304,6 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
 .mb-label { font-size:9px; color:var(--yellow); letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
 .mb-val { font-family:var(--font-display); font-size:36px; letter-spacing:2px; color:var(--yellow); line-height:1; }
 .mb-month { font-size:11px; color:var(--dim); margin-top:4px; }
-.mb-reset-note { font-size:10px; color:var(--dimmer); }
 
 /* TOAST */
 #toast { position:fixed; bottom:28px; right:28px; background:var(--green); color:#000; padding:12px 24px; border-radius:24px; font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:500; z-index:9999; opacity:0; transform:translateY(12px); pointer-events:none; transition:opacity 0.22s,transform 0.25s cubic-bezier(.4,0,.2,1); white-space:nowrap; }
@@ -328,6 +337,7 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
   .edit-bal-cur { width:auto; }
   #toast { bottom:calc(var(--nav-h) + var(--safe-b) + 14px); right:50%; transform:translateX(50%) translateY(12px); }
   #toast.show { transform:translateX(50%) translateY(0); }
+  #sync-status { top:auto; bottom:calc(var(--nav-h) + var(--safe-b) + 60px); right:50%; transform:translateX(50%); }
 }
 @media(min-width:769px) and (max-width:1100px) {
   .debt-grid,.tax-grid { grid-template-columns:1fr; }
@@ -342,6 +352,18 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
 </style>
 </head>
 <body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="load-title">Bradley's</div>
+  <div class="load-sub">Debt Tracker · Syncing your data</div>
+  <div class="load-bar"><div class="load-bar-fill"></div></div>
+  <div class="load-msg" id="load-msg">Connecting to cloud...</div>
+</div>
+
+<!-- SYNC STATUS -->
+<div id="sync-status" class="hidden"></div>
+
 <div id="shell">
 
 <!-- SIDEBAR -->
@@ -353,8 +375,8 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
   </div>
   <div class="sb-progress">
     <div class="sb-prog-label">Total Remaining</div>
-    <div class="sb-prog-rem" id="sb-rem">$14,149.30</div>
-    <div class="sb-prog-meta"><span id="sb-paid">$0.00 paid</span><span id="sb-pct">0%</span></div>
+    <div class="sb-prog-rem" id="sb-rem">—</div>
+    <div class="sb-prog-meta"><span id="sb-paid">Loading…</span><span id="sb-pct">—</span></div>
     <div class="bar h6"><div class="bar-fill" id="sb-bar" style="width:0%"></div></div>
   </div>
   <nav class="sb-nav">
@@ -416,12 +438,12 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
           <div class="grid-2">
             <div class="stat-card">
               <div class="stat-label">Total Debt</div>
-              <div class="stat-value" id="ds-total" style="font-size:28px">$14,149.30</div>
+              <div class="stat-value" id="ds-total" style="font-size:28px">—</div>
               <div class="stat-sub" id="ds-acct">5 accounts</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Total Paid</div>
-              <div class="stat-value" id="ds-paid" style="font-size:28px;color:var(--green)">$0.00</div>
+              <div class="stat-value" id="ds-paid" style="font-size:28px;color:var(--green)">—</div>
               <div class="stat-sub" id="ds-pct">0.0% cleared</div>
             </div>
           </div>
@@ -547,7 +569,6 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
               </div>
             </div>
           </div>
-
           <div class="slabel" style="margin-top:24px">
             <div style="display:flex;justify-content:space-between;align-items:center">
               <span>Expense Log</span>
@@ -556,11 +577,9 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
           </div>
           <div class="card" id="exp-list" style="padding:0;overflow:hidden"></div>
         </div>
-
         <div>
           <div class="slabel">Tax Estimate</div>
           <div id="refund-box"></div>
-
           <div class="tax-stat" style="margin-top:12px">
             <div class="ts-label">Total Expenses Logged</div>
             <div class="ts-val" id="tax-total-exp" style="color:var(--text)">$0.00</div>
@@ -571,20 +590,17 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
             <div class="ts-val" id="tax-deductible" style="color:var(--teal)">$0.00</div>
             <div class="ts-sub">Business write-offs</div>
           </div>
-
           <div class="slabel" style="margin-top:20px">Annual Income (for tax calc)</div>
           <div class="card">
-            <div style="font-size:11px;color:var(--dim);line-height:1.7;margin-bottom:12px">Your estimated gross income this year — used to calculate refund estimate. Updates automatically from Earnings tab if logged.</div>
+            <div style="font-size:11px;color:var(--dim);line-height:1.7;margin-bottom:12px">Your estimated gross income this year — used to calculate refund estimate.</div>
             <div style="display:flex;gap:10px">
               <input type="number" id="tax-income-inp" placeholder="$ annual gross income" class="teal-focus" style="flex:1">
               <button class="btn teal" onclick="saveTaxIncome()">Set</button>
             </div>
             <div style="font-size:11px;color:var(--teal);margin-top:10px" id="tax-income-confirm"></div>
           </div>
-
           <div class="slabel" style="margin-top:20px">By Category</div>
           <div class="card" id="tax-by-cat" style="padding:12px 20px"></div>
-
           <div style="margin-top:16px;text-align:right">
             <button class="btn danger sm" onclick="resetExpenses()">Clear All Expenses</button>
           </div>
@@ -604,10 +620,10 @@ hr.div { border:none; border-top:1px solid var(--border); margin:16px 0; }
     </div>
     <div>
       <div class="mh-rem-label">Remaining</div>
-      <div class="mh-rem" id="mh-rem">$14,149.30</div>
+      <div class="mh-rem" id="mh-rem">—</div>
     </div>
   </div>
-  <div class="mh-meta"><span id="mh-paid">PAID $0.00</span><span id="mh-pct">0.0%</span></div>
+  <div class="mh-meta"><span id="mh-paid">Loading…</span><span id="mh-pct">—</span></div>
   <div class="bar h6" style="margin-top:4px"><div class="bar-fill" id="mh-bar" style="width:0%"></div></div>
 </div>
 
@@ -770,30 +786,29 @@ const DEFAULT_DEBTS = [
 ];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-/* ══ DEFAULT EXPENSES (from the receipt) ══ */
 const SEED_EXPENSES = [
-  { id:Date.now()+1,  name:'Plugable USB-C Laptop Docking Station', cat:'Equipment',  amount:203.99, deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+2,  name:'COMICA Revo S Wireless Handheld Mic',   cat:'Equipment',  amount:84.53,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+3,  name:'Aothia Non-Slip PU Leather Desk Pad',   cat:'Equipment',  amount:9.99,   deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+4,  name:'Jabra Evolve2 55 Stereo Wireless Headset',cat:'Equipment',amount:160.00, deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+5,  name:'Large Extended Gaming Mouse Pad',        cat:'Equipment',  amount:12.57,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+6,  name:'GoHighLevel Software Subscription',      cat:'Software',   amount:97.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+7,  name:'VanillaSoft Subscription',               cat:'Software',   amount:150.00, deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+8,  name:'Canva Business Cards',                   cat:'Marketing',  amount:50.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+9,  name:'Claude Code Subscription',               cat:'Software',   amount:20.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+10, name:'Apify Subscription (Pay-as-you-Go)',     cat:'Software',   amount:35.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+11, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+12, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+13, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+14, name:'VanillaSoft Subscription',               cat:'Software',   amount:144.00, deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+15, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+16, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+17, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+18, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:25.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+19, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+20, name:'Sircon Platform Yearly Subscription',    cat:'Software',   amount:16.00,  deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+21, name:'Certificate State Licenses',             cat:'Education',  amount:700.00, deductible:true,  date:'5/11/2026' },
-  { id:Date.now()+22, name:'USHEALTH Administrators',                cat:'Insurance',  amount:264.00, deductible:true,  date:'5/11/2026' },
+  { id:1000001, name:'Plugable USB-C Laptop Docking Station', cat:'Equipment',  amount:203.99, deductible:true,  date:'5/11/2026' },
+  { id:1000002, name:'COMICA Revo S Wireless Handheld Mic',   cat:'Equipment',  amount:84.53,  deductible:true,  date:'5/11/2026' },
+  { id:1000003, name:'Aothia Non-Slip PU Leather Desk Pad',   cat:'Equipment',  amount:9.99,   deductible:true,  date:'5/11/2026' },
+  { id:1000004, name:'Jabra Evolve2 55 Stereo Wireless Headset',cat:'Equipment',amount:160.00, deductible:true,  date:'5/11/2026' },
+  { id:1000005, name:'Large Extended Gaming Mouse Pad',        cat:'Equipment',  amount:12.57,  deductible:true,  date:'5/11/2026' },
+  { id:1000006, name:'GoHighLevel Software Subscription',      cat:'Software',   amount:97.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000007, name:'VanillaSoft Subscription',               cat:'Software',   amount:150.00, deductible:true,  date:'5/11/2026' },
+  { id:1000008, name:'Canva Business Cards',                   cat:'Marketing',  amount:50.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000009, name:'Claude Code Subscription',               cat:'Software',   amount:20.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000010, name:'Apify Subscription (Pay-as-you-Go)',     cat:'Software',   amount:35.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000011, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000012, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000013, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000014, name:'VanillaSoft Subscription',               cat:'Software',   amount:144.00, deductible:true,  date:'5/11/2026' },
+  { id:1000015, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000016, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000017, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000018, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:25.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000019, name:'USHA Marketplace Transaction',           cat:'Insurance',  amount:75.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000020, name:'Sircon Platform Yearly Subscription',    cat:'Software',   amount:16.00,  deductible:true,  date:'5/11/2026' },
+  { id:1000021, name:'Certificate State Licenses',             cat:'Education',  amount:700.00, deductible:true,  date:'5/11/2026' },
+  { id:1000022, name:'USHEALTH Administrators',                cat:'Insurance',  amount:264.00, deductible:true,  date:'5/11/2026' },
 ];
 
 const CAT_COLORS = {
@@ -801,11 +816,10 @@ const CAT_COLORS = {
   Insurance:'#00D4AA', Marketing:'#FF8C00', Travel:'#5EC466', Other:'#8080A0'
 };
 
-/* ══ STATE ══ */
-function load() { try { return JSON.parse(localStorage.getItem('bdt5')||'{}'); } catch { return {}; } }
-function save() { localStorage.setItem('bdt5', JSON.stringify(st)); }
+/* ══ STORAGE KEYS ══ */
+const STORAGE_KEY = 'bradley-debt-v1';
 
-const saved = load();
+/* ══ STATE ══ */
 let st = {
   paid: {1:0,2:0,3:0,4:0,5:0},
   history: [],
@@ -814,15 +828,66 @@ let st = {
   originals: null,
   expenses: null,
   taxIncome: 0,
-  monthlyIncome: {}, // key: "YYYY-M" -> amount
+  monthlyIncome: {},
   expFilter: 'All',
-  ...saved
 };
 
-// Seed expenses if first time
-if (st.expenses === null) st.expenses = SEED_EXPENSES;
+/* ══ SYNC INDICATOR ══ */
+let syncTimer = null;
+function showSync(state, msg) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.className = state;
+  el.textContent = msg;
+  clearTimeout(syncTimer);
+  if (state === 'saved') {
+    syncTimer = setTimeout(() => { el.className = 'hidden'; }, 2500);
+  }
+}
 
-DEFAULT_DEBTS.forEach(d => { if (st.paid[d.id]==null) st.paid[d.id]=0; });
+/* ══ CLOUD STORAGE (window.storage = cross-device) ══ */
+async function cloudLoad() {
+  try {
+    showSync('syncing', '⟳ Loading…');
+    const result = await window.storage.get(STORAGE_KEY);
+    if (result && result.value) {
+      const loaded = JSON.parse(result.value);
+      st = { ...st, ...loaded };
+      // Ensure all debt IDs exist
+      DEFAULT_DEBTS.forEach(d => { if (st.paid[d.id] == null) st.paid[d.id] = 0; });
+      // Seed expenses on first load only if cloud had none
+      if (st.expenses === null) st.expenses = SEED_EXPENSES;
+    } else {
+      // First time — seed expenses
+      st.expenses = SEED_EXPENSES;
+      await cloudSave(true);
+    }
+    showSync('saved', '✓ Synced');
+  } catch (e) {
+    // Key doesn't exist yet — first time user
+    st.expenses = SEED_EXPENSES;
+    try { await cloudSave(true); } catch(e2) {}
+    showSync('saved', '✓ Ready');
+  }
+}
+
+async function cloudSave(silent = false) {
+  if (!silent) showSync('syncing', '⟳ Saving…');
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(st));
+    if (!silent) showSync('saved', '✓ Synced to all devices');
+  } catch (e) {
+    showSync('error', '✗ Save failed');
+    console.error('Storage save failed:', e);
+  }
+}
+
+// Debounced save — batches rapid writes into one cloud call
+let saveTimer = null;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => cloudSave(), 800);
+}
 
 /* ══ UTILS ══ */
 const fmt = n => '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1043,7 +1108,7 @@ function rHistory() {
   });
 }
 
-/* ══ EARNINGS (with monthly tracking that resets) ══ */
+/* ══ EARNINGS ══ */
 function _logEarning(amtId,noteId) {
   const amt=parseFloat(document.getElementById(amtId).value||0);
   const note=document.getElementById(noteId).value.trim()||'Paycheck';
@@ -1051,7 +1116,6 @@ function _logEarning(amtId,noteId) {
   const n=now();
   st.earnings=st.earnings||[];
   st.earnings.unshift({amount:amt,note,date:n.toLocaleDateString('en-US'),month:n.getMonth(),year:n.getFullYear(),ts:Date.now()});
-  // Track current month
   const key=curMonthKey();
   st.monthlyIncome=st.monthlyIncome||{};
   st.monthlyIncome[key]=(st.monthlyIncome[key]||0)+amt;
@@ -1069,9 +1133,6 @@ function rEarnings() {
   const yrE=earnings.filter(e=>e.year===yr);
   const yrTot=yrE.reduce((s,e)=>s+e.amount,0);
   const cnt=yrE.length, avg=cnt>0?yrTot/cnt:0, best=cnt>0?Math.max(...yrE.map(e=>e.amount)):0;
-
-  // Current month earnings (resets each month automatically)
-  const key=curMonthKey();
   const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const curMonthTotal=yrE.filter(e=>e.month===n.getMonth()).reduce((s,e)=>s+e.amount,0);
   const prevMonthIdx=n.getMonth()===0?11:n.getMonth()-1;
@@ -1088,7 +1149,6 @@ function rEarnings() {
 
   ['earn-year','m-earn-year'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=heroHTML;});
 
-  // Monthly bars
   const mT=Array(12).fill(0);
   yrE.forEach(e=>{mT[e.month]+=e.amount;});
   const maxM=Math.max(...mT,1);
@@ -1106,7 +1166,6 @@ function rEarnings() {
     });
   });
 
-  // All entries
   ['earn-list','m-earn-list'].forEach(id=>{
     const el=document.getElementById(id); if(!el)return;
     if(!earnings.length){el.innerHTML='<div class="empty">No paychecks yet.<br>Log your first one above.</div>';return;}
@@ -1122,7 +1181,6 @@ function rEarnings() {
 
 function delEarning(idx) {
   if(!confirm('Remove this entry?'))return;
-  // Also subtract from monthly tracking
   const e=st.earnings[idx];
   const key=`${e.year}-${e.month}`;
   if(st.monthlyIncome&&st.monthlyIncome[key]) {
@@ -1181,14 +1239,11 @@ function rTaxes() {
   const expenses=st.expenses||[];
   const totalExp=expenses.reduce((s,e)=>s+e.amount,0);
   const deductible=expenses.filter(e=>e.deductible).reduce((s,e)=>s+e.amount,0);
-
-  // Update stat boxes
   const te=document.getElementById('tax-total-exp');
   const td=document.getElementById('tax-deductible');
   if(te) te.textContent=fmt(totalExp);
   if(td) td.textContent=fmt(deductible);
 
-  // Tax income field sync
   const earnings=st.earnings||[];
   const yr=now().getFullYear();
   const yrEarnTotal=earnings.filter(e=>e.year===yr).reduce((s,e)=>s+e.amount,0);
@@ -1198,12 +1253,8 @@ function rTaxes() {
   const taxConf=document.getElementById('tax-income-confirm');
   if(taxConf) taxConf.textContent=effectiveTaxIncome>0?`Using: ${fmt(effectiveTaxIncome)} gross (self-employed est.)`:'';
 
-  // Refund estimate (simplified self-employed calc)
-  // SE tax = 15.3% on net SE income. Income tax varies by bracket.
-  // Net SE income = income - deductible expenses
   const netSE=Math.max(0,effectiveTaxIncome-deductible);
   const seTax=netSE*0.153;
-  // Rough federal income tax on netSE after standard deduction ($14,600 single 2024)
   const taxableInc=Math.max(0,netSE-14600);
   let fedTax=0;
   if(taxableInc>578125) fedTax=174238.25+(taxableInc-578125)*0.37;
@@ -1222,7 +1273,6 @@ function rTaxes() {
   </div>`;
   ['refund-box','m-refund-box'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=refundHTML;});
 
-  // Category breakdown
   const byCat={};
   expenses.forEach(e=>{byCat[e.cat]=(byCat[e.cat]||0)+e.amount;});
   const catEl=document.getElementById('tax-by-cat');
@@ -1237,14 +1287,11 @@ function rTaxes() {
     if(!Object.keys(byCat).length) catEl.innerHTML='<div class="empty" style="padding:12px 0">No expenses yet.</div>';
   }
 
-  // Filter buttons
   const cats=['All',...new Set(expenses.map(e=>e.cat))];
   const filterRow=document.getElementById('exp-filter-row');
   if(filterRow) filterRow.innerHTML=cats.map(c=>`<button class="filter-btn${st.expFilter===c?' active':''}" onclick="setExpFilter('${c}')">${c}</button>`).join('');
 
-  // Expense list
   const filtered=st.expFilter==='All'?expenses:expenses.filter(e=>e.cat===st.expFilter);
-
   ['exp-list','m-exp-list'].forEach(id=>{
     const el=document.getElementById(id); if(!el)return;
     if(!filtered.length){el.innerHTML='<div class="empty">No expenses yet.<br>Add one above.</div>';return;}
@@ -1289,11 +1336,10 @@ document.querySelectorAll('.sb-item,.bn-btn').forEach(btn=>{
   btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
 });
 
-// Sync floor inputs
 document.getElementById('floor-input').addEventListener('input',function(){const mi=document.getElementById('m-floor-input');if(mi)mi.value=this.value;});
 document.getElementById('m-floor-input').addEventListener('input',function(){const di=document.getElementById('floor-input');if(di)di.value=this.value;});
 
-/* ══ INIT ══ */
+/* ══ RENDER ALL ══ */
 function rAll() {
   rHeader(); rDashboard(); rDebts(); rBilling();
   const fv=fmt(st.floor)+' / month';
@@ -1303,9 +1349,45 @@ function rAll() {
   if(fc)fc.textContent='Floor set: '+fv; if(mfc)mfc.textContent='Floor set: '+fv;
 }
 
-rAll();
-rEarnings();
-rTaxes();
+/* ══ INIT WITH CLOUD LOAD ══ */
+async function init() {
+  const loadMsg = document.getElementById('load-msg');
+  const loadScreen = document.getElementById('loading-screen');
+
+  // Check if window.storage is available
+  if (typeof window.storage === 'undefined') {
+    // Fallback to localStorage if storage API not available
+    loadMsg.textContent = 'Using local storage (sign in to sync)...';
+    try {
+      const saved = JSON.parse(localStorage.getItem('bdt5') || '{}');
+      st = { ...st, ...saved };
+      DEFAULT_DEBTS.forEach(d => { if (st.paid[d.id] == null) st.paid[d.id] = 0; });
+      if (st.expenses === null) st.expenses = SEED_EXPENSES;
+    } catch(e) {
+      st.expenses = SEED_EXPENSES;
+    }
+    // Override save to use localStorage
+    window.cloudSave = async function() {
+      localStorage.setItem('bdt5', JSON.stringify(st));
+      showSync('error', '⚠ Local only — sign in to sync');
+    };
+  } else {
+    loadMsg.textContent = 'Syncing your data across devices...';
+    await cloudLoad();
+  }
+
+  rAll();
+  rEarnings();
+  rTaxes();
+
+  // Dismiss loading screen
+  setTimeout(() => {
+    loadScreen.classList.add('fade');
+    setTimeout(() => { loadScreen.style.display = 'none'; }, 400);
+  }, 600);
+}
+
+init();
 </script>
 </body>
 </html>
